@@ -1,303 +1,323 @@
 "use client";
 import styles from "../Login/Login.module.css";
 import React, { useState } from "react";
+import Link from "next/link";
+import { useForm, SubmitHandler } from "react-hook-form";
 
-//TODO: Add Username regex to prevent users from using special characters and inappropriate words
+type FormValues = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  username: string;
+  password: string;
+  confirmPassword: string;
+};
 
-export const Register = () => {
-  const [email, setEmail] = useState("");
-  const [pass, setPass] = useState("");
-  const [confirmPass, setConfirmPass] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [Username, setUsername] = useState("");
-
-  const [error, setError] = useState("");
-  const [firstNameError, setFirstNameError] = useState(false);
-  const [lastNameError, setLastNameError] = useState(false);
-  const [emailError, setEmailError] = useState(false);
-  const [UsernameError, setUsernameError] = useState(false);
-
-  const [buttonClicked, setButtonClicked] = useState(false);
+const Register: React.FC = () => {
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm<FormValues>();
   const [showPassword, setShowPassword] = useState(false);
-  const passwordRegex = /^(?=.*\d)(?=.*[A-Z])(?=.*[!@#$%^&*()]).{8,}$/;
+  const [step, setStep] = useState(1);
 
-  const handleTogglePassword = () => {
+  const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    setTimeout(() => {
-      setButtonClicked(false);
-    }, 500); // Revert signup button back to original color after 0.5 second of being clicked
-
-    setFirstNameError(false);
-    setLastNameError(false);
-    setEmailError(false);
-    setUsernameError(false);
-    setError("");
-
-    if (!firstName) {
-      setFirstNameError(true);
-      return;
-    }
-
-    if (!lastName) {
-      setLastNameError(true);
-      return;
-    }
-
-    if (
-      !email ||
-      !email.includes("@") ||
-      !email.includes(".") ||
-      email.includes(" ")
-    ) {
-      setEmailError(true);
-      return;
-    }
-
-    {
-      /*TODO: Check if email exists in database
-                if (emailExists) {
-                    setEmailError(true);
-                }*/
-    }
-
-    if (!Username) {
-      setUsernameError(true);
-      return;
-    }
-
-    {
-      /*TODO: Check if username exists in database
-                if (usernameExists) {
-                    setUsernameError(true);
-                }*/
-    }
-
-    {
-      /*Check if password is valid */
-    }
-    if (!passwordRegex.test(pass)) {
-      setError(
-        "Password must be at least 8 characters long, include a special character, and include at least one number and one capital letter."
-      );
-      return;
-    }
-    if (pass !== confirmPass) {
-      setError("Passwords do not match.");
-      return;
-    }
-
-    {
-      /*DELETE ONCE FINISHED */
-    }
-    {
-      /*DELETE ONCE FINISHED */
-    }
-    {
-      /*DELETE ONCE FINISHED */
-    }
-    {
-      /*DELETE ONCE FINISHED */
-    }
-    console.log(email);
-    console.log(pass);
-    console.log(confirmPass);
-    console.log(firstName);
-    console.log(lastName);
-    console.log(Username);
-
-    const makeRequest = async () => {
-      try {
-        const res = await fetch("http://35.233.194.137/signup", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email: email,
-            password: pass,
-            firstName: firstName,
-            lastName: lastName,
-            username: Username,
-          }),
-        });
-        console.log(res);
-
-        if (res.status === 201) {
-          // Redirect to home page or any other page after successful login
-          window.location.href = "/Login"; // Redirect to home page
-          console.log("registration successful");
-        } else {
-          // Handle failed login
-          console.error("registration failed");
-        }
-      } catch (error) {
-        console.error("An error occurred while registering:", error);
-      }
-    };
-
-    makeRequest();
+  const onSubmit: SubmitHandler<FormValues> = (data) => {
+    console.log(data);
+    // Here you can handle form submission
   };
 
   return (
-    <div className={styles.screenContainer}>
-      <div className={styles.loginBox}>
-        <div className={styles.logoContainer}>
-          <img
-            src="../../Public/Images/logo.png"
-            alt="CalPal Logo"
-            className={styles.logo}
-          />
-          <h1 className={styles.title}>CalPal</h1>
+    <div
+      style={{
+        background:
+          "var(--CalPal-Gradient, linear-gradient(253deg, #FFF 0.52%, #FCFBE8 33.85%, #E8FEFF 99.99%))",
+      }}
+      className="w-screen h-screen flex flex-col justify-center items-center"
+    >
+      <div
+        style={{ gridTemplateColumns: "1fr 2fr" }}
+        className="grid rounded-2xl shadow-md overflow-clip"
+      >
+        <RegisterWelcomePanel />
+        <div className="flex py-16 items-center justify-center bg-white">
+          <div className="flex flex-col justify-end items-center gap-16 w-3/5">
+            <CalPalLogo />
+            <form
+              onSubmit={handleSubmit(onSubmit)}
+              className="flex flex-col gap-8 self-stretch"
+            >
+              {step === 1 && (
+                <>
+                  <div className="flex flex-col gap-4">
+                    <div className="flex flex-col justify-start items-start gap-2 self-stretch">
+                      <label
+                        htmlFor="firstName"
+                        className="text-stone-900 text-2xl font-semibold tracking-tighter"
+                      >
+                        First Name
+                      </label>
+                      <input
+                        className="p-4 rounded-lg border border-gray-300 self-stretch"
+                        placeholder="Enter your first name"
+                        {...register("firstName", {
+                          required: "First name is required",
+                        })}
+                      />
+                      {errors.firstName && (
+                        <p className="text-red-500 text-sm">
+                          {errors.firstName.message}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex flex-col justify-start items-start gap-2 self-stretch">
+                      <label
+                        htmlFor="lastName"
+                        className="text-stone-900 text-2xl font-semibold tracking-tighter"
+                      >
+                        Last Name
+                      </label>
+                      <input
+                        className="p-4 rounded-lg border border-gray-300 self-stretch"
+                        placeholder="Enter your last name"
+                        {...register("lastName", {
+                          required: "Last name is required",
+                        })}
+                      />
+                      {errors.lastName && (
+                        <p className="text-red-500 text-sm">
+                          {errors.lastName.message}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex flex-col justify-start items-start gap-2 self-stretch">
+                      <label
+                        htmlFor="email"
+                        className="text-stone-900 text-2xl font-semibold tracking-tighter"
+                      >
+                        Email
+                      </label>
+                      <input
+                        className="p-4 rounded-lg border border-gray-300 self-stretch"
+                        type="email"
+                        placeholder="Enter your email"
+                        {...register("email", {
+                          required: "Email is required",
+                        })}
+                      />
+                      {errors.email && (
+                        <p className="text-red-500 text-sm">
+                          {errors.email.message}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    className="hover:bg-gray-700 p-2 bg-gray-800 rounded-lg flex-col justify-center items-center flex text-white text-lg"
+                    onClick={() => setStep(2)}
+                  >
+                    Next
+                  </button>
+                </>
+              )}
+
+              {step === 2 && (
+                <>
+                  <div className="flex flex-col gap-4">
+                    <div className="flex flex-col justify-start items-start gap-2 self-stretch">
+                      <label
+                        htmlFor="username"
+                        className="text-stone-900 text-2xl font-semibold tracking-tighter"
+                      >
+                        Username
+                      </label>
+                      <input
+                        className="p-4 rounded-lg border border-gray-300 self-stretch"
+                        placeholder="Enter your username"
+                        {...register("username", {
+                          required: "Username is required",
+                        })}
+                      />
+                      {errors.username && (
+                        <p className="text-red-500 text-sm">
+                          {errors.username.message}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex flex-col justify-start items-start gap-2 self-stretch">
+                      <label
+                        htmlFor="password"
+                        className="text-stone-900 text-2xl font-semibold tracking-tighter"
+                      >
+                        Password
+                      </label>
+                      <div className="relative w-full">
+                        <input
+                          className="p-4 rounded-lg border border-gray-300 self-stretch w-full pr-10"
+                          type={showPassword ? "text" : "password"}
+                          placeholder="Enter your password"
+                          {...register("password", {
+                            required: "Password is required",
+                          })}
+                        />
+                        <button
+                          type="button"
+                          onClick={togglePasswordVisibility}
+                          className="absolute inset-y-0 right-0 flex items-center pr-3"
+                        >
+                          {showPassword ? (
+                            <svg
+                              className="h-6 w-6 text-gray-600"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M12 4.5C7.306 4.5 3.326 7.2 1.639 12c1.687 4.8 5.667 7.5 10.361 7.5s8.674-2.7 10.361-7.5C20.674 7.2 16.694 4.5 12 4.5zM12 15.5a3.5 3.5 0 110-7 3.5 3.5 0 010 7z"
+                              />
+                            </svg>
+                          ) : (
+                            <svg
+                              className="h-6 w-6 text-gray-600"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M12 4.5C7.306 4.5 3.326 7.2 1.639 12c1.687 4.8 5.667 7.5 10.361 7.5s8.674-2.7 10.361-7.5C20.674 7.2 16.694 4.5 12 4.5zM12 15.5a3.5 3.5 0 110-7 3.5 3.5 0 010 7zM3 3l18 18"
+                              />
+                            </svg>
+                          )}
+                        </button>
+                      </div>
+                      {errors.password && (
+                        <p className="text-red-500 text-sm">
+                          {errors.password.message}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex flex-col justify-start items-start gap-2 self-stretch">
+                      <label
+                        htmlFor="confirmPassword"
+                        className="text-stone-900 text-2xl font-semibold tracking-tighter"
+                      >
+                        Confirm Password
+                      </label>
+                      <div className="relative w-full">
+                        <input
+                          className="p-4 rounded-lg border border-gray-300 self-stretch w-full pr-10"
+                          type={showPassword ? "text" : "password"}
+                          placeholder="Confirm your password"
+                          {...register("confirmPassword", {
+                            required: "Confirm password is required",
+                          })}
+                        />
+                        <button
+                          type="button"
+                          onClick={togglePasswordVisibility}
+                          className="absolute inset-y-0 right-0 flex items-center pr-3"
+                        >
+                          {showPassword ? (
+                            <svg
+                              className="h-6 w-6 text-gray-600"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M12 4.5C7.306 4.5 3.326 7.2 1.639 12c1.687 4.8 5.667 7.5 10.361 7.5s8.674-2.7 10.361-7.5C20.674 7.2 16.694 4.5 12 4.5zM12 15.5a3.5 3.5 0 110-7 3.5 3.5 0 010 7zM3 3l18 18"
+                              />
+                            </svg>
+                          ) : (
+                            <svg
+                              className="h-6 w-6 text-gray-600"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M12 4.5C7.306 4.5 3.326 7.2 1.639 12c1.687 4.8 5.667 7.5 10.361 7.5s8.674-2.7 10.361-7.5C20.674 7.2 16.694 4.5 12 4.5zM12 15.5a3.5 3.5 0 110-7 3.5 3.5 0 010 7zM3 3l18 18"
+                              />
+                            </svg>
+                          )}
+                        </button>
+                      </div>
+                      {errors.confirmPassword && (
+                        <p className="text-red-500 text-sm">
+                          {errors.confirmPassword.message}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <button
+                    type="submit"
+                    className="hover:bg-gray-700 p-2 bg-gray-800 rounded-lg flex-col justify-center items-center flex text-white text-lg"
+                  >
+                    Sign up
+                  </button>
+                </>
+              )}
+            </form>
+            <div className="flex-row justify-center items-center inline-flex">
+              <p className="text-center text-neutral-900 text-xl font-semibold">
+                Already have an account?&nbsp;
+              </p>
+              <Link
+                href="../Login"
+                className="hover:underline text-center text-xl font-semibold text-blue-500"
+              >
+                Login
+              </Link>
+            </div>
+          </div>
         </div>
-
-        <form onSubmit={handleSubmit} className={styles.loginForm}>
-          {/* First Name input field */}
-          <input
-            className={styles.input}
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-            placeholder="First Name"
-            id="name"
-            name="name"
-          />
-          {firstNameError && (
-            <p className={styles.error} style={{ color: "red" }}>
-              First name is required
-            </p>
-          )}
-
-          {/* Last Name input field */}
-          <input
-            className={styles.input}
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-            placeholder="Last Name"
-            id="name"
-            name="name"
-          />
-          {lastNameError && (
-            <p className={styles.error} style={{ color: "red" }}>
-              Last name is required
-            </p>
-          )}
-
-          {/* Email input field */}
-          <input
-            className={styles.input}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            type="email"
-            placeholder="Email"
-            id="email"
-            name="email"
-          />
-          {emailError && (
-            <p className={styles.error} style={{ color: "red" }}>
-              Invalid Email
-            </p>
-          )}
-
-          {/* Username input field */}
-          <input
-            className={styles.input}
-            value={Username}
-            onChange={(e) => setUsername(e.target.value)}
-            type="username"
-            placeholder="Username"
-            id="username"
-            name="username"
-          />
-          {UsernameError && (
-            <p className={styles.error} style={{ color: "red" }}>
-              Username is required
-            </p>
-          )}
-
-          {/* Password input field */}
-          <div style={{ position: "relative" }}>
-            <input
-              className={styles.input}
-              value={pass}
-              onChange={(e) => setPass(e.target.value)}
-              type={showPassword ? "text" : "password"}
-              placeholder="Password"
-              id="password"
-              name="password"
-            />
-            <button
-              type="button"
-              onClick={handleTogglePassword}
-              style={{
-                position: "absolute",
-                right: "5px",
-                top: "50%",
-                transform: "translateY(-50%)",
-              }}
-            >
-              {showPassword ? "Hide" : "Show"}
-            </button>
-          </div>
-
-          {/* Confirm Password input field */}
-          <div style={{ position: "relative" }}>
-            <input
-              className={styles.input}
-              value={confirmPass}
-              onChange={(e) => setConfirmPass(e.target.value)}
-              type={showPassword ? "text" : "password"}
-              placeholder="Confirm Password"
-              id="password"
-              name="password"
-            />
-            <button
-              type="button"
-              onClick={handleTogglePassword}
-              style={{
-                position: "absolute",
-                right: "5px",
-                top: "50%",
-                transform: "translateY(-50%)",
-              }}
-            >
-              {showPassword ? "Hide" : "Show"}
-            </button>
-          </div>
-
-          <div className={styles.forgotPassword}>
-            {/* Already have an account? link */}
-            <a href="../Login" className={styles.forgotPasswordLink}>
-              Already have an account? Login
-            </a>
-          </div>
-          {error && (
-            <p className={styles.error} style={{ color: "red" }}>
-              {error}
-            </p>
-          )}
-          {/* Sign up button */}
-          <button
-            type="submit"
-            className={styles.loginButton}
-            style={{
-              backgroundColor: buttonClicked
-                ? "var(--Default-CF577B, #CF577B) "
-                : "var(--Default-F886A8, #F886A8)",
-            }}
-            onMouseEnter={() => setButtonClicked(false)}
-            onMouseDown={() => setButtonClicked(true)}
-          >
-            Sign up
-          </button>
-        </form>
       </div>
     </div>
   );
 };
+
+function CalPalLogo() {
+  return (
+    <div className="flex flex-row gap-2 items-center">
+      {/* <span>
+  <ViewList />
+</span> */}
+      <span className={styles.textCalPal}>CalPal</span>
+    </div>
+  );
+}
+
+function RegisterWelcomePanel() {
+  return (
+    <div className="flex justify-end items-center self-stretch py-6 px-16 border-r border-gray-200 bg-white">
+      <div className="hover:gap-4 transition-all flex flex-col items-start gap-0">
+        <span className={styles.textWelcome}>Getting</span>
+        <span className={`${styles.textBack} ml-20`}>Started</span>
+      </div>
+    </div>
+  );
+}
 
 export default Register;
